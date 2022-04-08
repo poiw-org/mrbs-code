@@ -33,7 +33,7 @@ class AuthCas extends Auth
       phpCAS::setVerbose(true);
     }
 
-    phpCAS::client(CAS_VERSION_2_0,
+    phpCAS::client(CAS_VERSION_3_0,
       $auth['cas']['host'],
       (int)$auth['cas']['port'],
       $auth['cas']['context']);
@@ -97,7 +97,7 @@ class AuthCas extends Auth
   }
 
 
-  protected function getUserFresh(string $username) : ?User
+  public function getUser(string $username) : ?User
   {
     $user = new User($username);
     $user->level = $this->getLevel($username);

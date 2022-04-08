@@ -90,10 +90,6 @@ CREATE TABLE mrbs_room
   custom_html      text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
 
   PRIMARY KEY (id),
-  FOREIGN KEY (area_id)
-    REFERENCES mrbs_area(id)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT,
   UNIQUE KEY uq_room_name (area_id, room_name),
   KEY idxSortKey (sort_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -124,11 +120,7 @@ CREATE TABLE mrbs_repeat
   ical_uid       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' NOT NULL,
   ical_sequence  smallint DEFAULT 0 NOT NULL,
 
-  PRIMARY KEY (id),
-  FOREIGN KEY (room_id)
-    REFERENCES mrbs_room(id)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE mrbs_entry
@@ -162,14 +154,6 @@ CREATE TABLE mrbs_entry
   registration_closes_enabled tinyint DEFAULT 0 NOT NULL,
 
   PRIMARY KEY (id),
-  FOREIGN KEY (room_id)
-    REFERENCES mrbs_room(id)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT,
-  FOREIGN KEY (repeat_id)
-    REFERENCES mrbs_repeat(id)
-    ON UPDATE CASCADE
-    ON DELETE CASCADE,
   KEY idxStartTime (start_time),
   KEY idxEndTime   (end_time),
   KEY idxRoomStartEnd (room_id, start_time, end_time)
@@ -184,11 +168,7 @@ CREATE TABLE mrbs_participants
   registered  int,
 
   PRIMARY KEY (id),
-  UNIQUE KEY uq_entryid_username (entry_id, username),
-  FOREIGN KEY (entry_id)
-    REFERENCES mrbs_entry(id)
-    ON UPDATE CASCADE
-    ON DELETE CASCADE
+  UNIQUE KEY uq_entryid_username (entry_id, username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE mrbs_variables

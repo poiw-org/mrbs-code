@@ -1011,7 +1011,7 @@ class CAS_Client
             //normal mode: get ticket and remove it from CGI parameters for
             // developers
             $ticket = (isset($_GET['ticket']) ? $_GET['ticket'] : null);
-            if (preg_match('/^[SP]T-/', $ticket) ) {
+            if (TRUE) {
                 phpCAS::trace('Ticket \''.$ticket.'\' found');
                 $this->setTicket($ticket);
                 unset($_GET['ticket']);
@@ -1443,6 +1443,7 @@ class CAS_Client
                     $this->validateCAS20(
                         $validate_url, $text_response, $tree_response, $renew
                     ); // note: if it fails, it halts
+
                     phpCAS::trace(
                         'CAS '.$this->getServerVersion().' ticket `'.$this->getTicket().'\' was validated'
                     );
@@ -3240,7 +3241,7 @@ class CAS_Client
             // authentication succeded, extract the user name
             $success_elements = $tree_response
                 ->getElementsByTagName("authenticationSuccess");
-            if ( $success_elements->item(0)->getElementsByTagName("user")->length == 0) {
+            if ( $success_elements->item(0)->getElementsByTagName("name")->length == 0) {
                 // no user specified => error
                 throw new CAS_AuthenticationException(
                     $this, 'Ticket not validated', $validate_url,
@@ -3250,7 +3251,7 @@ class CAS_Client
             } else {
                 $this->_setUser(
                     trim(
-                        $success_elements->item(0)->getElementsByTagName("user")->item(0)->nodeValue
+                        $success_elements->item(0)->getElementsByTagName("name")->item(0)->nodeValue
                     )
                 );
                 $this->_readExtraAttributesCas20($success_elements);

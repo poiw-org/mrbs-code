@@ -1,11 +1,10 @@
 <?php
 namespace MRBS;
 
-use MRBS\Form\Element;
-use MRBS\Form\Field;
 use MRBS\Form\Form;
 use MRBS\Form\ElementFieldset;
 use MRBS\Form\ElementInputHidden;
+use MRBS\Form\FieldDiv;
 use MRBS\Form\FieldInputDatalist;
 use MRBS\Form\FieldInputDate;
 use MRBS\Form\FieldInputRadioGroup;
@@ -17,7 +16,7 @@ use MRBS\Form\FieldSelect;
 require "defaultincludes.inc";
 
 
-function get_field_from_date(array $data) : FieldInputDate
+function get_field_from_date($data)
 {
   $value = format_iso_date($data['from_year'], $data['from_month'], $data['from_day']);
   $field = new FieldInputDate();
@@ -30,7 +29,7 @@ function get_field_from_date(array $data) : FieldInputDate
 }
 
 
-function get_field_to_date(array $data) : FieldInputDate
+function get_field_to_date($data)
 {
   $value = format_iso_date($data['to_year'], $data['to_month'], $data['to_day']);
   $field = new FieldInputDate();
@@ -43,7 +42,7 @@ function get_field_to_date(array $data) : FieldInputDate
 }
 
 
-function get_field_areamatch(array $data) : FieldInputDatalist
+function get_field_areamatch($data)
 {
   $field = new FieldInputDatalist();
   $options = get_area_names($all=true);
@@ -57,7 +56,7 @@ function get_field_areamatch(array $data) : FieldInputDatalist
 }
 
 
-function get_field_roommatch(array $data) : FieldInputDatalist
+function get_field_roommatch($data)
 {
   $field = new FieldInputDatalist();
 
@@ -86,7 +85,7 @@ function get_field_roommatch(array $data) : FieldInputDatalist
 }
 
 
-function get_field_typematch(array $data) : ?FieldSelect
+function get_field_typematch($data)
 {
   $options = get_type_options(true);
 
@@ -110,7 +109,7 @@ function get_field_typematch(array $data) : ?FieldSelect
 }
 
 
-function get_field_match_private(array $data) : ?Element
+function get_field_match_private($data)
 {
   global $mrbs_user, $private_somewhere;
 
@@ -144,7 +143,7 @@ function get_field_match_private(array $data) : ?Element
 }
 
 
-function get_field_match_confirmed(array $data) : ?FieldInputRadioGroup
+function get_field_match_confirmed($data)
 {
   global $confirmation_somewhere;
 
@@ -166,7 +165,7 @@ function get_field_match_confirmed(array $data) : ?FieldInputRadioGroup
 }
 
 
-function get_field_match_approved(array $data) : ?FieldInputRadioGroup
+function get_field_match_approved($data)
 {
   global $approval_somewhere;
 
@@ -188,7 +187,7 @@ function get_field_match_approved(array $data) : ?FieldInputRadioGroup
 }
 
 
-function get_field_custom(array $data, string $key) : Field
+function get_field_custom($data, $key)
 {
   $var = "match_$key";
   global $$var;
@@ -228,7 +227,7 @@ function get_field_custom(array $data, string $key) : Field
 // Generates a text input field of some kind.   If $select_options or $datalist_options
 // is set then it will be a datalist, otherwise it will be a simple input field
 //   $params  an array indexed by 'label', 'name', 'value' and 'field'
-function get_field_report_input(array $params) : Field
+function get_field_report_input($params)
 {
   global $select_options, $datalist_options;
 
@@ -274,7 +273,7 @@ function get_field_report_input(array $params) : Field
 }
 
 
-function get_fieldset_search_criteria(array $data) : ElementFieldset
+function get_fieldset_search_criteria($data)
 {
   global $report_search_field_order;
 
@@ -352,7 +351,7 @@ function get_fieldset_search_criteria(array $data) : ElementFieldset
 }
 
 
-function get_field_output(array $data) : FieldInputRadioGroup
+function get_field_output($data)
 {
   $options = array(REPORT  => get_vocab('report'),
                    SUMMARY => get_vocab('summary'));
@@ -363,7 +362,7 @@ function get_field_output(array $data) : FieldInputRadioGroup
 }
 
 
-function get_field_output_format(array $data) : FieldInputRadioGroup
+function get_field_output_format($data)
 {
   global $times_somewhere;
 
@@ -385,7 +384,7 @@ function get_field_output_format(array $data) : FieldInputRadioGroup
 }
 
 
-function get_field_sortby(array $data) : FieldInputRadioGroup
+function get_field_sortby($data)
 {
   $options = array('r' => get_vocab('sort_room'),
                    's' => get_vocab('sort_rep_time'));
@@ -396,7 +395,7 @@ function get_field_sortby(array $data) : FieldInputRadioGroup
 }
 
 
-function get_field_sumby(array $data) : FieldInputRadioGroup
+function get_field_sumby($data)
 {
   $options = array('d' => get_vocab('sum_by_descrip'),
                    'c' => get_vocab('sum_by_creator'),
@@ -408,7 +407,7 @@ function get_field_sumby(array $data) : FieldInputRadioGroup
 }
 
 
-function get_fieldset_presentation_options(array $data) : ElementFieldset
+function get_fieldset_presentation_options($data)
 {
   global $report_presentation_field_order;
 
@@ -444,7 +443,7 @@ function get_fieldset_presentation_options(array $data) : ElementFieldset
 }
 
 
-function get_fieldset_submit_buttons() : ElementFieldset
+function get_fieldset_submit_buttons()
 {
   $fieldset = new ElementFieldset();
 
@@ -458,7 +457,7 @@ function get_fieldset_submit_buttons() : ElementFieldset
 
 
 // Works out whether the machine architecture is little-endian
-function is_little_endian() : bool
+function is_little_endian()
 {
   static $result;
 
@@ -475,7 +474,7 @@ function is_little_endian() : bool
 
 // Converts a string from the standard MRBS character set to the character set
 // to be used for CSV files
-function csv_conv(string $string)
+function csv_conv($string)
 {
   $in_charset = utf8_strtoupper(get_charset());
   $out_charset = utf8_strtoupper(get_csv_charset());
@@ -523,7 +522,7 @@ function csv_conv(string $string)
 
 
 // Escape a string for output
-function escape(string $string) : string
+function escape($string)
 {
   global $output_format;
 
@@ -544,7 +543,7 @@ function escape(string $string) : string
 
 
 // Wraps $string in a span with a data-type value of $data_type - but only for HTML output
-function type_wrap(string $string, string $data_type) : string
+function type_wrap($string, $data_type)
 {
   global $output_format;
 
@@ -555,48 +554,6 @@ function type_wrap(string $string, string $data_type) : string
   else
   {
     return $string;
-  }
-}
-
-
-// Gets the indices of the columns that should be sorted
-function get_sort_columns(string $sortby) : array
-{
-  global $field_order_list;
-
-  $indices = [];
-  $i = 0;
-  $keys = ['area_name', 'room_name', 'start_time'];
-
-  foreach ($field_order_list as $field)
-  {
-    if (in_array($field, $keys))
-    {
-      $indices[$field] = $i;
-    }
-
-    if (count($indices) == 3)
-    {
-      break;  // We've got all of them
-    }
-
-    $i++;
-    // End_time is a special case because it uses up two columns: one for
-    // the end time, and another for the duration.
-    if ($field == 'end_time')
-    {
-      $i++;
-    }
-  }
-
-  switch($sortby)
-  {
-    case 'r':
-      return [$indices['area_name'], $indices['room_name'], $indices['start_time']];
-      break;
-    default:
-      return [$indices['start_time'], $indices['area_name'], $indices['room_name']];
-      break;
   }
 }
 
@@ -621,17 +578,16 @@ function report_header()
   foreach ($field_order_list as $field)
   {
     // We give some columns a type data value so that the JavaScript knows how to sort them
-    // TODO: the 'title-*' plugins are now deprecated in DataTables.  Use the replacement.
     switch ($field)
     {
       case 'name':
         $values[] = get_vocab("namebooker");
         break;
       case 'area_name':
-        $values[] = type_wrap(get_vocab("area"), 'title-string');
+        $values[] = get_vocab("area");
         break;
       case 'room_name':
-        $values[] = type_wrap(get_vocab("room"), 'title-string');
+        $values[] = get_vocab("room");
         break;
       case 'start_time':
         $values[] = type_wrap(get_vocab("start_date"), 'title-numeric');
@@ -712,20 +668,12 @@ function report_header()
 
 function open_report()
 {
-  global $output_format, $is_ajax, $sortby;
+  global $output_format, $is_ajax;
 
   if ($output_format == OUTPUT_HTML && !$is_ajax)
   {
     echo "<div id=\"report_output\" class=\"datatable_container\">\n";
-    echo '<table class="admin_table display" id="report_table"';
-    // Add the index numbers of the columns that have to be sorted as a data
-    // attribute in order to help the JavaScript.
-    $sort_columns = get_sort_columns($sortby);
-    if (!empty($sort_columns))
-    {
-      echo ' data-sort-columns="' . htmlspecialchars(json_encode($sort_columns)) . '"';
-    }
-    echo ">\n";
+    echo "<table class=\"admin_table display\" id=\"report_table\">\n";
   }
 }
 
@@ -879,7 +827,6 @@ function report_row(&$rows, $data)
   global $approval_somewhere, $confirmation_somewhere, $registration_somewhere;
   global $select_options, $booking_types;
   global $field_order_list;
-  global $include_registered_by;
 
   // If we're capable of delivering an Ajax request and this is not Ajax request,
   // then don't do anything.  We're going to save sending the data until we actually
@@ -954,7 +901,7 @@ function report_row(&$rows, $data)
       case 'allow_registration':
         if ($data['allow_registration'])
         {
-          $value = implode(', ', auth()->getRegistrantsDisplayNames($data, $include_registered_by));
+          $value = implode(', ', auth()->getRegistrantsDisplayNames($data));
         }
         else
         {
@@ -1011,18 +958,12 @@ function report_row(&$rows, $data)
           // Process the duration and then fall through to the end_time
           // Include the duration in a seconds as a title in an empty span so
           // that the column can be sorted and filtered properly
-          $d_string = '<span title="' . htmlspecialchars($duration_seconds) . '"></span>' . $d_string;
+          $d_string = "<span title=\"$duration_seconds\"></span>$d_string";
         case 'start_time':
         case 'last_updated':
           // Include the numeric time as a title in an empty span so
           // that the column can be sorted and filtered properly
-          $value = '<span title="' . htmlspecialchars($data[$field]) . '"></span>' . $value;
-          break;
-        case 'area_name':
-          $value = '<span title="' . htmlspecialchars($data['area_sort_key']) . '"></span></span>' . $value;
-          break;
-        case 'room_name':
-          $value = '<span title="' . htmlspecialchars($data['room_sort_key']) . '"></span></span>' . $value;
+          $value = "<span title=\"${data[$field]}\"></span>$value";
           break;
         default:
           break;
@@ -1033,12 +974,10 @@ function report_row(&$rows, $data)
     // they are going to be irrelevant
     if (($confirmation_somewhere || ($field != 'confirmation_enabled')) &&
         ($approval_somewhere || ($field != 'approval_enabled')) &&
-        ($registration_somewhere || ($field != 'allow_registration')) &&
         ((isset($booking_types) && (count($booking_types) > 1)) || ($field != 'type')))
     {
       $values[] = $value;
     }
-
     // Special action for the duration
     if ($field == 'end_time')
     {
@@ -1064,6 +1003,7 @@ function get_sumby_name_from_row($row)
     case 't':
       $name = get_type_vocab($row['type']);
       break;
+    case 'c':
     default:
       $name = $row['create_by'];
       break;
@@ -1096,6 +1036,7 @@ function accumulate($row, &$count, &$hours, $report_start, $report_end,
 
   $periods_per_day = count($periods);
 
+  $row['enable_periods']; ////////////////////////
   // Use brief description, created by or type as the name:
   $name = get_sumby_name_from_row($row);
   // Area and room separated by break (if HTML):
@@ -1420,26 +1361,13 @@ $descrmatch = get_form_var('descrmatch', 'string');
 $output = get_form_var('output', 'int', REPORT);
 $output_format = get_form_var('output_format', 'int', (($cli_mode) ? OUTPUT_CSV : OUTPUT_HTML));
 $typematch = get_form_var('typematch', 'array');
-$sortby = get_form_var('sortby', 'string', $default_sortby ?? FALLBACK_SORTBY);  // $sortby: r=room, s=start date/time.
-$sumby = get_form_var('sumby', 'string', $default_sumby ?? FALLBACK_SUMBY);  // $sumby: d=by brief description, c=by creator, t=by type.
+$sortby = get_form_var('sortby', 'string', 'r');  // $sortby: r=room, s=start date/time.
+$sumby = get_form_var('sumby', 'string', 'd');  // $sumby: d=by brief description, c=by creator, t=by type.
 $match_approved = get_form_var('match_approved', 'int', BOOLEAN_MATCH_BOTH);
 $match_confirmed = get_form_var('match_confirmed', 'int', BOOLEAN_MATCH_BOTH);
 $match_private = get_form_var('match_private', 'int', BOOLEAN_MATCH_BOTH);
 $phase = get_form_var('phase', 'int', 1);
 $datatable = get_form_var('datatable', 'int');  // Will only be set if we're using DataTables
-
-// Validate form variables
-if (!in_array($sortby, ['r', 's']))
-{
-  trigger_error("Unknown sort code '$sortby'; using '" . FALLBACK_SORTBY . "'.", E_USER_NOTICE);
-  $sortby = FALLBACK_SORTBY;
-}
-
-if (!in_array($sumby, ['c', 'd', 't']))
-{
-  trigger_error("Unknown sumby code '$sumby'; using '" . FALLBACK_SUMBY ."'.", E_USER_NOTICE);
-  $sumby = FALLBACK_SUMBY;
-}
 
 list($from_year, $from_month, $from_day) = split_iso_date($from_date);
 list($to_year, $to_month, $to_day) = split_iso_date($to_date);
@@ -1571,7 +1499,7 @@ if ($phase == 2)
   $sql_params = array();
   $sql = "SELECT E.*, "
        .  db()->syntax_timestamp_to_unix("E.timestamp") . " AS last_updated, "
-       . "A.area_name, A.sort_key AS area_sort_key, R.room_name, R.sort_key AS room_sort_key, R.area_id, "
+       . "A.area_name, R.room_name, R.area_id, "
        . "A.approval_enabled, A.confirmation_enabled, A.enable_periods";
   if ($output_format == OUTPUT_ICAL)
   {

@@ -14,7 +14,7 @@ $context = array(
     'month'     => $month,
     'day'       => $day,
     'area'      => $area,
-    'room'      => $room ?? null
+    'room'      => isset($room) ? $room : null
   );
 
 print_header($context);
@@ -77,16 +77,6 @@ echo get_vocab("please_contact") . '<a href="mailto:' . rawurlencode($mrbs_admin
   . "</a> " . get_vocab("for_any_questions") . "\n";
 echo "</p>\n";
 
-$faqfile = $faqfilelang ?? '';
-
-// Older versions of MRBS required an underscore in front of the language
-// in the config setting.  In order to maintain backwards compatibility we
-// cater for both old (eg "_fr") and new (eg "fr") styles.
-if (($faqfile !== '') && !str_starts_with($faqfile, '_'))
-{
-  $faqfile = '_' . $faqfile;
-}
-
-require_once "site_faq/site_faq" . $faqfile . ".html";
+require_once "site_faq/site_faq" . $faqfilelang . ".html";
 
 print_footer();

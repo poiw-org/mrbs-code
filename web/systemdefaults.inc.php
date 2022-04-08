@@ -127,7 +127,7 @@ $mrbs_admin_email = "admin_email@your.org";
 // The company name is mandatory.   It is used in the header and also for email notifications.
 // The company logo, additional information and URL are all optional.
 
-$mrbs_company = "Your Company";   // This line must always be uncommented ($mrbs_company is used in various places)
+$mrbs_company = "ΠΟΛΙΤΙΣΤΙΚΟΣ ΣΥΛΛΟΓΟΣ ΦΟΙΤΗΤΩΝ ΕΛ.ΜΕ.ΠΑ.";   // This line must always be uncommented ($mrbs_company is used in various places)
 
 // Uncomment this next line to use a logo instead of text for your organisation in the header
 //$mrbs_company_logo = "your_logo.gif";    // name of your logo file.   This example assumes it is in the MRBS directory
@@ -402,9 +402,6 @@ $ajax_refresh_rate = 10;
 // refreshed in order to keep them from getting out of date.  Set to 0 to disable.
 $prefetch_refresh_rate = 30;
 
-// Refresh rate (in seconds) when in kiosk mode
-$kiosk_refresh_rate = 0; // Temporarily disabled
-
 // Entries in monthly view can be shown as start/end slot, brief description or
 // both. Set to "description" for brief description, "slot" for time slot and
 // "both" for both. Default is "both", but 6 entries per day are shown instead
@@ -441,9 +438,8 @@ $row_labels_both_sides = false;
 // well as the top in the day and week views, set to true;
 $column_labels_both_ends = false;
 
-// Show a line in the day and week views corresponding to the current time(
-$show_timeline = true;  // normal mode
-$show_timeline_kiosk = false;  // kiosk mode
+// Show a line in the day and week views corresponding to the current time
+$show_timeline = true;
 
 // For bookings that allow registration, show the number of people that have
 // registered and, if there is one, the registration limit.  This will typically
@@ -530,23 +526,9 @@ $max_rep_entrys = 365 + 1;
 // Default report span in days:
 $default_report_days = 60;
 
-// Whether to include the name of the person who made the registration, if different, in
-// the list of registrants in reports
-$include_registered_by = true;
-
 $show_plus_link = false;   // Change to true to always show the (+) link as in
                            // MRBS 1.1.
 
-// Determines whether MRBS should get all the display names at once when
-// asked to get a single display name.  MRBS converts usernames to display
-// names when displaying bookings and in reports.  This can be an expensive
-// operation when using an external authentication type, eg 'db_ext', 'ldap'
-// or 'wix', and it is usually much faster to retrieve all the names at once
-// when getting the first name, especially when producing large reports.  However
-// sometimes retrieving all the names can take a very long time, eg when
-// working with a very large LDAP directory, and it can be better just to retrieve
-// each name when needed.
-$get_display_names_all_at_once = true;
 
 // PRIVATE BOOKINGS SETTINGS
 
@@ -744,7 +726,7 @@ $report_presentation_field_order = array();
 $auth["type"] = "db"; // How to validate the user/password. One of
                       // "auth_basic", "cas", "config", "crypt", "db", "db_ext", "idcheck",
                       // "imap", "imap_php", "joomla", "ldap", "none", "nw", "pop3",
-                      // "saml", "wix" or "wordpress".
+                      // "saml" or "wordpress".
 
 $auth["session"] = "php"; // How to get and keep the user ID. One of
                           // "cas", "cookie", "host", "http", "ip", "joomla", "nt",
@@ -1117,35 +1099,6 @@ $auth['saml']['disable_mrbs_session_init'] = false;
 // https://simplesamlphp.org/docs/stable/simplesamlphp-sp
 
 
-// 'auth_wix' configuration settings
-$auth['wix']['site_url'] = "https://example.com/";  // The URL of your WIX site
-
-// The API key that you generated and saved in your Wix secrets manager.
-$auth['wix']['mrbs_api_key'] = "";
-
-// The name of the secret in your Wix secrets manager
-$auth['wix']['mrbs_api_key_secret_name'] = "MRBS_API_key";
-
-// The name (title) of the badge that determines whether a member is an
-// MRBS admin.  Note that badge names are case-sensitive.  You can also
-// configure admins in the config file by using
-// $auth['admin'][] = "someone@example.com";
-$auth['wix']['admin_badge'] = "MRBS Admin";
-
-// The name of the member property to be used for the display name.
-// Typically either 'name' or 'nickname'.
-$auth['wix']['display_name_property'] = 'name';
-
-// The number of results to be found at a time in the Wix backend when getting
-// a list of all members.  This is a configuration setting that is passed to
-// the Wix backend code as part of the request.  It is just used internally in
-// the backend and doesn't affect the size of the list returned to MRBS.
-$auth['wix']['limit'] = 500;
-
-// Setting this to true will cause debug information to be written to the PHP
-// error log.
-$auth['wix']['debug'] = false;
-
 // 'auth_wordpress' configuration settings
 $auth['wordpress']['rel_path'] = '..';   // Path to the WordPress installation relative to MRBS.
 // List of WordPress roles that have MRBS Admin capabilities.  The default is 'administrator'.
@@ -1500,7 +1453,7 @@ $disable_automatic_language_changing = false;
 // e.g. use "fr" to use the translations in "lang.fr" as the default
 // translations.  [NOTE: it is only necessary to change this if you
 // have disabled automatic language changing above]
-$default_language_tokens = "en";
+$default_language_tokens = "el";
 
 // Set this to a valid locale that is supported on the OS you run the
 // MRBS server on if you want to override the automatic locale determination
@@ -1509,11 +1462,10 @@ $default_language_tokens = "en";
 // a format suitable for your OS, eg by adding '.utf-8' or changing it to 'eng'.
 $override_locale = "";
 
-// FAQ file language selection. If not set, use the default English file.
-// If your language faq file is available, set $faqfilelang to match the
-// end of the file name, excluding the underscore (eg for site_faq_fr.html
-// use "fr").  For compatibility with older versions of MRBS settings with
-// the underscore, eg "_fr" are supported, but deprecated.
+// faq file language selection. IF not set, use the default english file.
+// IF your language faq file is available, set $faqfilelang to match the
+// end of the file name, including the underscore (ie. for site_faq_fr.html
+// use "_fr"
 $faqfilelang = "";
 
 // Language selection when run from the command line
@@ -1540,14 +1492,6 @@ $language_debug = false;
 /*************
  * Reports
  *************/
-
-// Default form options
-
-// Sort report by 'r' for room, 's' for start time.
-$default_sortby = 'r';
-
-// Summary: sum by 'd' for brief description, 'c' for creator, 't' for type
-$default_sumby = 'd';
 
 // Default file names
 $report_filename  = "report";
@@ -1584,12 +1528,6 @@ $default_import_source = 'file';
 
 // Default setting for importing past events
 $default_import_past = true;
-
-// By default iCalendar notifications will be sent with the PARTSTAT property set to
-// "NEEDS-ACTION".  If you set this variable to true then it will be set to "ACCEPTED".
-// This will change how the notification is treated by your email/calendar client.
-// See RFC 5545 for more details.
-$partstat_accepted = false;
 
 
 /*************

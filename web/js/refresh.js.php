@@ -42,15 +42,9 @@ var refreshPage = function refreshPage() {
                   page_date: args.pageDate,
                   area: args.area,
                   room: args.room};
-
       if (args.timetohighlight !== undefined)
       {
         data.timetohighlight = args.timetohighlight;
-      }
-
-      if (args.kiosk !== undefined)
-      {
-        data.kiosk = args.kiosk;
       }
 
       <?php
@@ -453,32 +447,20 @@ $(document).on('page_ready', function() {
   ?>
   $('table.dwm_main').on('tableload', function() {
 
-      var refreshRate;
-
       sizeColumns();
 
-      if (args.kiosk)
+      <?php
+      if (!empty($refresh_rate))
       {
-        refreshRate = <?php echo $kiosk_refresh_rate ?? 0; ?>;
-      }
-      else
-      {
-        refreshRate = <?php echo $refresh_rate ?? 0; ?>;
-      }
-
-      if (refreshRate !== 0)
-      {
-
-        <?php
         // Set an interval timer to refresh the page, unless there's already one in place
         ?>
         if (typeof intervalId === 'undefined')
         {
-          intervalId = setInterval(refreshPage, refreshRate * 1000);
+          intervalId = setInterval(refreshPage, <?php echo $refresh_rate * 1000 ?>);
         }
+        <?php
       }
 
-      <?php
       // Add an event listener to detect a change in the visibility
       // state.  We can then suspend Ajax refreshing when the page is
       // hidden to save on server, client and network load.
@@ -496,19 +478,15 @@ $(document).on('page_ready', function() {
       }
 
       <?php
-      if (!$enable_periods)
+      if ($show_timeline && !$enable_periods)
       {
-        // If required, add a timeline showing the current time. Also need to recalculate
-        //the timeline if the window is resized.
+        // Add a timeline showing the current time. Also need to recalculate the timeline if
+        // the window is resized.
         ?>
-        if ((args.kiosk && <?php echo ($show_timeline_kiosk) ? 'true' : 'false'?>) ||
-            (!args.kiosk && <?php echo($show_timeline) ? 'true' : 'false'?>))
-        {
-          Timeline.show();
-          $(window).on('resize', function () {
+        Timeline.show();
+        $(window).on('resize', function () {
             Timeline.show();
           });
-        }
         <?php
       }
       ?>

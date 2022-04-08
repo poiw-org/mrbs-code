@@ -250,7 +250,7 @@ function output_row($row)
               (($field['nature'] == 'integer') && isset($field['length']) && ($field['length'] <= 2)) )
           {
             // booleans: represent by a checkmark
-            $values[] = (!empty($col_value)) ? "&check;" : '';
+            $values[] = (!empty($col_value)) ? "<img src=\"images/check.png\" alt=\"check mark\" width=\"16\" height=\"16\">" : "&nbsp;";
           }
           elseif (($field['nature'] == 'integer') && isset($field['length']) && ($field['length'] > 2))
           {
@@ -387,28 +387,12 @@ function get_field_custom($custom_field, $params, $disabled=false)
   global $select_options, $datalist_options, $is_mandatory_field, $pattern;
   global $text_input_max;
 
-  // TODO: have a common way of generating custom fields for all tables
-
   // Output a checkbox if it's a boolean or integer <= 2 bytes (which we will
   // assume are intended to be booleans)
   if (($custom_field['nature'] == 'boolean') ||
       (($custom_field['nature'] == 'integer') && isset($custom_field['length']) && ($custom_field['length'] <= 2)) )
   {
     $class = 'FieldInputCheckbox';
-  }
-  // Otherwise check if it's an integer field
-  elseif ((($custom_field['nature'] == 'integer') && ($custom_field['length'] > 2)) ||
-          ($custom_field['nature'] == 'decimal'))
-  {
-    $class = 'FieldInputNumber';
-  }
-  elseif (!empty($select_options[$params['field']]))
-  {
-    $class = 'FieldSelect';
-  }
-  elseif (!empty($datalist_options[$params['field']]))
-  {
-    $class = 'FieldInputDatalist';
   }
   // Output a textarea if it's a character string longer than the limit for a
   // text input
@@ -420,6 +404,14 @@ function get_field_custom($custom_field, $params, $disabled=false)
   {
     $class = 'FieldInputDate';
   }
+  elseif (!empty($select_options[$params['field']]))
+  {
+    $class = 'FieldSelect';
+  }
+  elseif (!empty($datalist_options[$params['field']]))
+  {
+    $class = 'FieldInputDatalist';
+  }
   else
   {
     $class = 'FieldInputText';
@@ -428,15 +420,7 @@ function get_field_custom($custom_field, $params, $disabled=false)
   $full_class = __NAMESPACE__ . "\\Form\\$class";
   $field = new $full_class();
   $field->setLabel($params['label'])
-        ->setControlAttribute('name', $params['name']);
-
-  if ($custom_field['nature'] == 'decimal')
-  {
-    list( , $decimal_places) = explode(',', $custom_field['length']);
-    $step = pow(10, -$decimal_places);
-    $step = number_format($step, $decimal_places);
-    $field->setControlAttribute('step', $step);
-  }
+          ->setControlAttribute('name', $params['name']);
 
   if (!empty($is_mandatory_field[$params['field']]))
   {
@@ -476,7 +460,6 @@ function get_field_custom($custom_field, $params, $disabled=false)
       break;
 
     case 'FieldInputDate':
-    case 'FieldInputNumber':
       $field->setControlAttribute('value', $params['value']);
       break;
 
@@ -1147,11 +1130,10 @@ if (isset($action) && ($action == "update"))
     if ($fieldname != 'id')
     {
       $value = $values[$fieldname];
-      
+
       // pre-process the field value for SQL
       switch ($field['nature'])
       {
-        case 'decimal':
         case 'integer':
           if (!isset($value) || ($value === ''))
           {

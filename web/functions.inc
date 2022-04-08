@@ -7,6 +7,67 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 require_once "mrbs_sql.inc";
 
+
+// Emulates the PHP 8 function str_contains()
+if (!function_exists('str_contains'))
+{
+  function str_contains($haystack, $needle)
+  {
+    if (!isset($needle) || ($needle === ''))
+    {
+      // This is the way the PHP function behaves
+      return true;
+    }
+    else
+    {
+      // This works with multibyte characters because
+      // we are not worried about the actual position.
+      return (strpos($haystack, $needle) !== false);
+    }
+  }
+}
+
+
+// Emulates the PHP 8 function str_starts_with()
+if (!function_exists('str_starts_with'))
+{
+  function str_starts_with($haystack, $needle)
+  {
+    if (!isset($needle) || ($needle === ''))
+    {
+      // This is the way the PHP function behaves
+      return true;
+    }
+    else
+    {
+      // This works with multibyte characters because
+      // we are looking for position zero.
+      return (strpos($haystack, $needle) === 0);
+    }
+  }
+}
+
+
+// Emulates the PHP 8 function str_ends_with()
+if (!function_exists('str_ends_with'))
+{
+  function str_ends_with($haystack, $needle)
+  {
+    if (!isset($needle) || ($needle === ''))
+    {
+      // This is the way the PHP function behaves
+      return true;
+    }
+    else
+    {
+      // This works with multibyte characters because strpos() and strlen()
+      // will either be both overloaded with the mb_ versions or both not.
+      return (strpos($haystack, $needle) === strlen($haystack) - strlen($needle));
+    }
+  }
+}
+
+
 // Constrain an integer to fit a certain type.  Useful for making sure
 // that integers will fit within the range for a database type.
 // Only 4 byte unsigned integers supported at the moment.
@@ -203,11 +264,6 @@ function url_get_contents($url, $if_modified_since=null)
     curl_setopt($ch, CURLOPT_TIMEOUT, $curlopt_timeout);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    // Use compression if we can
-    if (defined('CURLOPT_ENCODING'))
-    {
-      curl_setopt($ch, CURLOPT_ENCODING, '');
-    }
     if (isset($if_modified_since))
     {
       curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -513,6 +569,13 @@ function mrbs_default_timezone_get()
 }
 
 
+function get_display_name($username)
+{
+  $user = auth()->getUser($username);
+  return (isset($user)) ? $user->display_name : $username;
+}
+
+
 // Gets the username and display name, if different.  Useful in places such as search and
 // report results, where you have to search by username - because that's what's stored in
 // the entry - but you are interested in the display name.
@@ -523,7 +586,7 @@ function get_compound_name($username)
   if (isset($username))
   {
     $result = $username;
-    $display_name = auth()->getDisplayName($username);
+    $display_name = get_display_name($username);
     if ($username !== $display_name)
     {
       $result .= " ($display_name)";

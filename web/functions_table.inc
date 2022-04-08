@@ -467,16 +467,11 @@ function room_cell_html(array $room, array $vars) : string
 //    $text     contains the date, formatted as a string (not escaped - allowed to contain HTML tags)
 //    $link     the href to be used for the link
 //    $date     the date in yyyy-mm-dd format
-function day_cell_html(string $text, string $link, string $date) : string
+function day_cell_html($text, $link, $date) : string
 {
   $html = '';
   // Put the date into a data attribute so that it can be picked up by JavaScript
-  $html .= '<th data-date="' . htmlspecialchars($date) . '"';
-  if (is_weekend(date('w', strtotime($date))))
-  {
-    $html .= ' class="weekend"';
-  }
-  $html .= '>';
+  $html .= '<th data-date="' . htmlspecialchars($date) . '">';
   $html .= '<a href="' . htmlspecialchars($link) . '"' .
            ' title="' . htmlspecialchars(get_vocab("viewday")) . '">';
   $html .= $text;  // allowed to contain HTML tags - do not escape
@@ -628,21 +623,13 @@ function get_rooms_header_cells($rooms, $vars) : string
 }
 
 
-function day_table_innerhtml($view, $year, $month, $day, $area_id, $room_id, $timetohighlight=null, ?string $kiosk=null) : string
+function day_table_innerhtml($view, $year, $month, $day, $area_id, $room_id, $timetohighlight=null) : string
 {
   global $enable_periods;
   global $times_along_top, $row_labels_both_sides, $column_labels_both_ends;
   global $resolution, $morningstarts, $morningstarts_minutes;
 
-  if ($kiosk === 'room')
-  {
-    $rooms = array(get_room_details($room_id));
-  }
-  else
-  {
-    $rooms = get_rooms($area_id);
-  }
-
+  $rooms = get_rooms($area_id);
   $n_rooms = count($rooms);
 
   if ($n_rooms == 0)
@@ -653,22 +640,6 @@ function day_table_innerhtml($view, $year, $month, $day, $area_id, $room_id, $ti
 
   $start_first_slot = get_start_first_slot($month, $day, $year);
   $start_last_slot = get_start_last_slot($month, $day, $year);
-  // Keep a count of the number of slots at the start of the day that we're
-  // not showing (will only be relevant in kiosk mode).
-  $skipped_slots = 0;
-
-  // If we are in kiosk mode we are not interested in what has already happened
-  if (isset($kiosk))
-  {
-    $now = time();
-    $start_next_slot = $start_first_slot + $resolution;
-    while (($now > $start_next_slot) && ($start_next_slot < $start_last_slot))
-    {
-      $start_first_slot = $start_next_slot;
-      $skipped_slots++;
-      $start_next_slot = $start_first_slot + $resolution;
-    }
-  }
 
   // Work out whether there's a possibility that a time slot is invalid,
   // in other words whether the booking day includes a transition into DST.
@@ -696,8 +667,8 @@ function day_table_innerhtml($view, $year, $month, $day, $area_id, $room_id, $ti
     }
   }
 
-  $n_time_slots = get_n_time_slots() - $skipped_slots;
-  $morning_slot_seconds = ((($morningstarts * 60) + $morningstarts_minutes) * 60) + ($skipped_slots * $resolution);
+  $n_time_slots = get_n_time_slots();
+  $morning_slot_seconds = (($morningstarts * 60) + $morningstarts_minutes) * 60;
   $evening_slot_seconds = $morning_slot_seconds + (($n_time_slots - 1) * $resolution);
 
 
@@ -707,11 +678,6 @@ function day_table_innerhtml($view, $year, $month, $day, $area_id, $room_id, $ti
   $slots = get_slots($month, $day, $year);
   if (isset($slots))
   {
-    // Remove the skipped slots from the start of the first day's array
-    for ($i=0; $i<$skipped_slots; $i++)
-    {
-      array_shift($slots[0]);
-    }
     // Add some data to enable the JavaScript to draw the timeline
     $thead .= ' data-slots="' . htmlspecialchars(json_encode($slots)) . '"';
     $thead .= ' data-timeline-vertical="' . (($times_along_top) ? 'true' : 'false') . '"';
@@ -1118,9 +1084,7 @@ function multiday_view_all_rooms_innerhtml($view, $view_all, $year, $month, $day
         $link = multisite($link);
         $t = mktime(12, 0, 0, $month, $day_start_interval + $j, $year);
         $text = ($i === 0) ? get_day($t, $view) : get_date($t, $view);
-        $header_inner_rows[$i] .= '<th' .
-          ((is_weekend(date('w', $t))) ? ' class="weekend"' : '') .
-          '><a href="' . htmlspecialchars($link) . '">' . htmlspecialchars($text) . "</a></th>\n";
+        $header_inner_rows[$i] .= '<th><a href="' . htmlspecialchars($link) . '">' . htmlspecialchars($text) . "</a></th>\n";
       }
 
       // next line to display rooms on right side
@@ -1262,7 +1226,7 @@ function get_slots($month, $day, $year, $n_days=1, $day_cells=false)
       $d = $day + $j;
 
       // If there's more than one day in the interval then don't include the hidden days in the array, because
-      // they don't appear in the DOM.  If there's only one day then we've managed to display the hidden day.
+      // they don't appear in the DOM.  If there's only one day then we've managed to display the hiden day.
       if (($n_days > 1) &&
           is_hidden_day(date('w', mktime($morningstarts, $morningstarts_minutes, 0, $month, $d, $year))))
       {
@@ -1615,8 +1579,7 @@ function cmp3($a, $b)
 }
 
 
-// Gets the table header row for the single room month view
-function get_table_head() : string
+function get_table_head()
 {
   global $weekstarts;
 
@@ -1627,22 +1590,16 @@ function get_table_head() : string
   $html .= "<tr>\n";
   for ($i = 0; $i< DAYS_PER_WEEK; $i++)
   {
-    $classes = [];
-    $dow = ($i + $weekstarts) % DAYS_PER_WEEK;
-    if (is_hidden_day($dow))
+    if (is_hidden_day(($i + $weekstarts) % DAYS_PER_WEEK))
     {
-      $classes[] = 'hidden_day';
+      // These days are to be hidden in the display (as they are hidden, just give the
+      // day of the week in the header row
+      $html .= "<th class=\"hidden_day\">" . day_name(($i + $weekstarts)%DAYS_PER_WEEK) . "</th>";
     }
-    if (is_weekend($dow))
+    else
     {
-      $classes[] = 'weekend';
+      $html .= "<th>" . day_name(($i + $weekstarts)%DAYS_PER_WEEK) . "</th>";
     }
-    $html .= '<th';
-    if (!empty($classes))
-    {
-      $html .= ' class="' . implode(' ', $classes) . '"';
-    }
-    $html .= '>' . day_name(($i + $weekstarts)%DAYS_PER_WEEK) . '</th>';
   }
   $html .= "\n</tr>\n";
   $html .= "</thead>\n";

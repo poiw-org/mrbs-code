@@ -508,7 +508,7 @@ function get_field_type($value, $disabled=false)
   {
     return null;
   }
-
+  
   // If it's a mandatory field add a blank option to force a selection
   if (!empty($is_mandatory_field['entry.type']))
   {
@@ -580,9 +580,6 @@ function get_field_custom($key, $disabled=false)
 {
   global $custom_fields, $custom_fields_map;
   global $is_mandatory_field, $text_input_max;
-  global $select_options, $datalist_options;
-
-  // TODO: have a common way of generating custom fields for all tables
 
   // First check that the custom field exists.  It normally will, but won't if
   // $edit_entry_field_order contains a value for which a field doesn't exist.
@@ -601,12 +598,10 @@ function get_field_custom($key, $disabled=false)
     $class = 'FieldInputCheckbox';
   }
   // Output a textarea if it's a character string longer than the limit for a
-  // text input and it's not a select or datalist element
+  // text input
   elseif (($custom_field['nature'] == 'character') &&
            isset($custom_field['length']) &&
-           ($custom_field['length'] > $text_input_max) &&
-           empty($select_options["entry.$key"]) &&
-           empty($datalist_options["entry.$key"]))
+           ($custom_field['length'] > $text_input_max))
   {
     // HTML5 does not allow a pattern attribute for the textarea element
     $class = 'FieldTextarea';
@@ -1200,10 +1195,6 @@ if (isset($start_date))
     list($rep_end_year, $rep_end_month, $rep_end_day) = explode('-', $end_date);
   }
 }
-else
-{
-  $start_date = format_iso_date($year, $month, $day);
-}
 
 
 // This page will either add or modify a booking
@@ -1486,12 +1477,7 @@ else
     $end_minutes = intval($end_seconds/60);
     $end_hour = intval($end_minutes/60);
     $end_minute = $end_minutes%60;
-    if (!isset($end_date))
-    {
-      $end_date = $start_date;
-    }
-    list($end_year, $end_month, $end_day) = explode('-', $end_date);
-    $end_time = mktime($end_hour, $end_minute, 0, $end_month, $end_day, $end_year);
+    $end_time = mktime($end_hour, $end_minute, 0, $month, $day, $year);
     $duration = $end_time - $start_time - cross_dst($start_time, $end_time);
   }
   else

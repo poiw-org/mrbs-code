@@ -1,13 +1,8 @@
 <?php
 namespace MRBS\Auth;
 
-use MRBS\Exception;
 use MRBS\User;
-use function MRBS\fatal_error;
-use function MRBS\get_microtime;
 use function MRBS\in_arrayi;
-use function MRBS\session;
-use function MRBS\utf8_strtolower;
 
 
 class AuthLdap extends Auth
@@ -165,7 +160,7 @@ class AuthLdap extends Auth
         {
           if (count($$item) != $count)
           {
-            fatal_error("MRBS configuration error: Count of LDAP array config variables doesn't match, aborting!");
+            \MRBS\fatal_error("MRBS configuration error: Count of LDAP array config variables doesn't match, aborting!");
           }
         }
         else
@@ -320,35 +315,53 @@ class AuthLdap extends Auth
   }
 
 
-  protected function getUserFresh(string $username) : ?User
+  public function getUser(string $username) : ?User
   {
+    static $users = array();  // Cache results for performance
+
     if (!isset($username) || ($username === ''))
     {
       return null;
     }
 
-    $object = array();
-
-    $res = $this->action('getUserCallback', $username, $object);
-    if (!$res || !isset($object['user']))
+    if (!isset($users[$username]))
     {
-      return null;
-    }
-
-    // Use $object['user']['username'] rather than $username because they won't necessarily be
-    // the same.  See https://sourceforge.net/p/mrbs/bugs/518/
-    $user = parent::getUserFresh($object['user']['username']);
-    $keys = array('display_name', 'email', 'level');
-
-    foreach ($keys as $key)
-    {
-      if (isset($object['user'][$key]))
+      // Check to see if this is the current user.  If it is then we
+      // can save ourselves an LDAP query.
+      $mrbs_user = \MRBS\session()->getCurrentUser();
+      if (isset($mrbs_user) && ($mrbs_user->username === $username))
       {
-        $user->$key = $object['user'][$key];
+        $user = $mrbs_user;
       }
+      // Otherwise we'll have to query LDAP.
+      else
+      {
+        $object = array();
+
+        $res = $this->action('getUserCallback', $username, $object);
+        if (!$res || !isset($object['user']))
+        {
+          return null;
+        }
+
+        $user = parent::getUser($username);
+        $keys = array('display_name', 'email', 'level');
+
+        foreach ($keys as $key)
+        {
+          if (isset($object['user'][$key]))
+          {
+            $user->$key = $object['user'][$key];
+          }
+        }
+      }
+
+      // Update the cache (we use the static variable as the cache rather than the
+      // database because the database might be out of date).
+      $users[$username] = $user;
     }
 
-    return $user;
+    return $users[$username];
   }
 
 
@@ -485,7 +498,7 @@ class AuthLdap extends Auth
 
   public function getUsernames()
   {
-    $mrbs_user = session()->getCurrentUser();
+    $mrbs_user = \MRBS\session()->getCurrentUser();
 
     if (!isset($mrbs_user))
     {
@@ -536,13 +549,13 @@ class AuthLdap extends Auth
     $filter = "($filter)";
 
     // Form the attributes
-    $username_attrib = utf8_strtolower($object['config']['ldap_user_attrib']);
+    $username_attrib = \MRBS\utf8_strtolower($object['config']['ldap_user_attrib']);
     $attributes = array($username_attrib);
 
     // The display name attribute might not have been set in the config file
     if (isset($object['config']['ldap_name_attrib']))
     {
-      $display_name_attrib = utf8_strtolower($object['config']['ldap_name_attrib']);
+      $display_name_attrib = \MRBS\utf8_strtolower($object['config']['ldap_name_attrib']);
       $attributes[] = $display_name_attrib;
     }
 
@@ -574,7 +587,7 @@ class AuthLdap extends Auth
       while ($attribute)
       {
         $values = ldap_get_values($ldap, $entry, $attribute);
-        $attribute = utf8_strtolower($attribute);  // ready for the comparisons
+        $attribute = \MRBS\utf8_strtolower($attribute);  // ready for the comparisons
 
         if ($attribute == $username_attrib)
         {
@@ -610,24 +623,24 @@ class AuthLdap extends Auth
     $result = array();
 
     // Username
-    $result['username'] = utf8_strtolower($object['config']['ldap_user_attrib']);
+    $result['username'] = \MRBS\utf8_strtolower($object['config']['ldap_user_attrib']);
 
     // The display name attribute might not have been set in the config file
     if (isset($object['config']['ldap_name_attrib']))
     {
-      $result['display_name'] = utf8_strtolower($object['config']['ldap_name_attrib']);
+      $result['display_name'] = \MRBS\utf8_strtolower($object['config']['ldap_name_attrib']);
     }
 
     // The email address
     if ($include_email && isset($object['config']['ldap_email_attrib']))
     {
-      $result['email'] = utf8_strtolower($object['config']['ldap_email_attrib']);
+      $result['email'] = \MRBS\utf8_strtolower($object['config']['ldap_email_attrib']);
     }
 
     // The group name attribute might not have been set in the config file
     if ($include_groups && isset($object['config']['ldap_group_member_attrib']))
     {
-      $result['groups'] = utf8_strtolower($object['config']['ldap_group_member_attrib']);
+      $result['groups'] = \MRBS\utf8_strtolower($object['config']['ldap_group_member_attrib']);
     }
 
     return $result;
@@ -653,7 +666,7 @@ class AuthLdap extends Auth
           $user[$key] = array();
           break;
         default:
-          throw new Exception("Unknown key '$key'");
+          throw new \Exception("Unknown key '$key'");
       }
     }
 
@@ -663,7 +676,7 @@ class AuthLdap extends Auth
     while ($attribute)
     {
       $values = ldap_get_values($ldap, $entry, $attribute);
-      $attribute = utf8_strtolower($attribute);  // ready for the comparisons
+      $attribute = \MRBS\utf8_strtolower($attribute);  // ready for the comparisons
 
       if ($attribute == $attributes['username'])
       {
@@ -963,7 +976,12 @@ class AuthLdap extends Auth
 
     if ($ldap_debug || $ldap_debug_attributes)
     {
-      self::logDebugMessage($message);
+      list($called, $caller) = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+      error_log(
+          "[MRBS DEBUG] " .
+          $caller['class'] . $caller['type'] . $caller['function'] . '(' . $called['line'] . ')' .
+          ": $message"
+        );
     }
   }
 
@@ -974,7 +992,7 @@ class AuthLdap extends Auth
 
     if ($ldap_debug)
     {
-      return (get_microtime() - self::$profile_clock);
+      return (\MRBS\get_microtime() - self::$profile_clock);
     }
     else
     {
@@ -989,7 +1007,7 @@ class AuthLdap extends Auth
 
     if ($ldap_debug)
     {
-      self::$profile_clock = get_microtime();
+      self::$profile_clock = \MRBS\get_microtime();
     }
   }
 

@@ -10,7 +10,7 @@ require_once "functions_table.inc";
 
 
 // Display the entry-type color key.
-function get_color_key() : string
+function get_color_key()
 {
   global $booking_types;
 
@@ -36,7 +36,7 @@ function get_color_key() : string
 
 // generates some html that can be used to select which area should be
 // displayed.
-function make_area_select_html($view, $year, $month, $day, $current) : string
+function make_area_select_html($view, $year, $month, $day, $current)
 {
   global $multisite, $site;
 
@@ -85,7 +85,7 @@ function make_area_select_html($view, $year, $month, $day, $current) : string
 } // end make_area_select_html
 
 
-function make_room_select_html ($view, $view_all, $year, $month, $day, $area, $current) : string
+function make_room_select_html ($view, $view_all, $year, $month, $day, $area, $current)
 {
   global $multisite, $site;
 
@@ -153,7 +153,7 @@ function make_room_select_html ($view, $view_all, $year, $month, $day, $area, $c
 
 
 // Gets the link to the next/previous day/week/month
-function get_adjacent_link($view, $view_all, $year, $month, $day, $area, $room, $next=false) : string
+function get_adjacent_link($view, $view_all, $year, $month, $day, $area, $room, $next=false)
 {
   switch ($view)
   {
@@ -194,7 +194,7 @@ function get_adjacent_link($view, $view_all, $year, $month, $day, $area, $room, 
 
 
 // Gets the link for today
-function get_today_link($view, $view_all, $area, $room) : string
+function get_today_link($view, $view_all, $area, $room)
 {
   $date = getdate();
 
@@ -208,7 +208,7 @@ function get_today_link($view, $view_all, $area, $room) : string
 }
 
 
-function get_location_nav($view, $view_all, $year, $month, $day, $area, $room) : string
+function get_location_nav($view, $view_all, $year, $month, $day, $area, $room)
 {
   $html = '';
 
@@ -226,7 +226,7 @@ function get_location_nav($view, $view_all, $year, $month, $day, $area, $room) :
 }
 
 
-function get_view_nav($current_view, $view_all, $year, $month, $day, $area, $room) : string
+function get_view_nav($current_view, $view_all, $year, $month, $day, $area, $room)
 {
   $html = '';
 
@@ -239,7 +239,7 @@ function get_view_nav($current_view, $view_all, $year, $month, $day, $area, $roo
 
   foreach ($views as $view => $token)
   {
-    $this_view_all = $view_all ?? 1;
+    $this_view_all = (isset($view_all)) ? $view_all : 1;
 
     $vars = array('view'      => $view,
                   'view_all'  => $this_view_all,
@@ -261,7 +261,7 @@ function get_view_nav($current_view, $view_all, $year, $month, $day, $area, $roo
 }
 
 
-function get_arrow_nav($view, $view_all, $year, $month, $day, $area, $room) : string
+function get_arrow_nav($view, $view_all, $year, $month, $day, $area, $room)
 {
   $html = '';
 
@@ -308,7 +308,7 @@ function get_arrow_nav($view, $view_all, $year, $month, $day, $area, $room) : st
 }
 
 
-function get_calendar_nav($view, $view_all, $year, $month, $day, $area, $room, $hidden=false) : string
+function get_calendar_nav($view, $view_all, $year, $month, $day, $area, $room, $hidden=false)
 {
   $html = '';
 
@@ -326,7 +326,7 @@ function get_calendar_nav($view, $view_all, $year, $month, $day, $area, $room, $
 }
 
 
-function get_date_heading($view, $year, $month, $day) : string
+function get_date_heading($view, $year, $month, $day)
 {
   global $strftime_format, $display_timezone,
          $weekstarts, $mincals_week_numbers;
@@ -410,12 +410,6 @@ if ($room < 0)
   $view_all = 1;
 }
 
-// We only support the day view in kiosk mode at the moment
-if (isset($kiosk))
-{
-  $view = 'day';
-}
-
 $is_ajax = is_ajax();
 
 // If we're using the 'db' authentication type, check to see if MRBS has just been installed
@@ -433,6 +427,9 @@ if (!checkAuthorised(this_page(), $refresh))
 
 switch ($view)
 {
+  case 'day':
+    $inner_html = day_table_innerhtml($view, $year, $month, $day, $area, $room, $timetohighlight);
+    break;
   case 'week':
     $inner_html = week_table_innerhtml($view, $view_all, $year, $month, $day, $area, $room, $timetohighlight);
     break;
@@ -440,11 +437,7 @@ switch ($view)
     $inner_html = month_table_innerhtml($view, $view_all, $year, $month, $day, $area, $room);
     break;
   default:
-    if ($view !== 'day')
-    {
-      trigger_error("Unknown view '$view'", E_USER_WARNING);
-    }
-    $inner_html = day_table_innerhtml($view, $year, $month, $day, $area, $room, $timetohighlight, $kiosk);
+    throw new \Exception("Unknown view '$view'");
     break;
 }
 
@@ -462,8 +455,7 @@ $context = array(
     'month'     => $month,
     'day'       => $day,
     'area'      => $area,
-    'room'      => $room ?? null,
-    'kiosk'     => $kiosk ?? null
+    'room'      => isset($room) ? $room : null
   );
 
 print_header($context);

@@ -188,18 +188,10 @@ var prefetch = function() {
   var delay = <?php echo $prefetch_refresh_rate?> * 1000;
   var hrefs = [];
   ['a.prev', 'a.next'].forEach(function(link) {
-      var link = $(link);
-      <?php
-      // Don't waste time prefetching data for links that aren't visible, which
-      // they won't be if we are in kiosk mode.
-      ?>
-      if (link.is(':visible'))
+      var href = $(link).attr('href');
+      if (typeof href !== 'undefined')
       {
-        var href = link.attr('href');
-        if (typeof href !== 'undefined')
-        {
-          hrefs.push(href);
-        }
+        hrefs.push(href);
       }
     });
 

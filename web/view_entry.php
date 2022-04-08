@@ -48,17 +48,20 @@ function generate_registrant_table($row, $previous_page=null)
     }
     echo '</td>';
     // Registrant
-    $display_name = auth()->getDisplayName($registrant['username']);
+    $registrant_user = auth()->getUser($registrant['username']);
+    $display_name = (isset($registrant_user)) ? $registrant_user->display_name : $registrant['username'];
     $sortname = get_sortable_name($display_name);
     echo '<td data-order="' . htmlspecialchars($sortname) . '">' . htmlspecialchars($display_name) . '</td>';
     // Registered by - only show if it's someone other than the registrant
-    if ($registrant['create_by'] === $registrant['username'])
+    $registrant_creator = auth()->getUser($registrant['create_by']);
+    if (isset($registrant_creator) && isset($registrant_user) &&
+        ($registrant_creator->username === $registrant_user->username))
     {
       $display_name = '';
     }
     else
     {
-      $display_name = auth()->getDisplayName($registrant['create_by']);
+      $display_name = (isset($registrant_creator)) ? $registrant_creator->display_name : $registrant['create_by'];
     }
     $sortname = get_sortable_name($display_name);
     echo '<td data-order="' . htmlspecialchars($sortname) . '">' . htmlspecialchars($display_name) . '</td>';
@@ -103,8 +106,6 @@ function get_returl($previous_page=null)
 
 function generate_cancel_registration_button(array $row, array $registrant, $label_text, $previous_page=null, $as_field=false)
 {
-  global $area, $room;
-
   // Check that it is not too late for ordinary users to cancel
   if (!is_book_admin($row['room_id']) && entry_registration_cancellation_has_closed($row))
   {
@@ -124,14 +125,13 @@ function generate_cancel_registration_button(array $row, array $registrant, $lab
   $form->addHiddenInputs(array(
     'action' => 'cancel',
     'registration_id' => $registrant['id'],
-    'returl' => get_returl($previous_page),
-    'area' => $area,
-    'room' => $room
+    'returl' => get_returl($previous_page)
   ));
 
   // Submit button
   $button = new ElementInputSubmit();
-  $display_name = auth()->getDisplayName($registrant['username']);
+  $registrant_user = auth()->getUser($registrant['username']);
+  $display_name = (isset($registrant_user)) ? $registrant_user->display_name : $registrant['username'];
   $message = get_vocab("confirm_del_registrant", $display_name);
   $button->setAttributes(array(
       'value' => $label_text,
@@ -157,8 +157,6 @@ function generate_cancel_registration_button(array $row, array $registrant, $lab
 
 function generate_register_button($row, $previous_page=null)
 {
-  global $area, $room;
-
   // Check that the user is an an admin or else that the entry is open for registration
   if (!is_book_admin($row['room_id']) && !entry_registration_is_open($row))
   {
@@ -177,9 +175,7 @@ function generate_register_button($row, $previous_page=null)
   $form->addHiddenInputs(array(
       'action' => 'register',
       'event_id' => $row['id'],
-      'returl' => get_returl($previous_page),
-      'area' => $area,
-      'room' => $room
+      'returl' => get_returl($previous_page)
     ));
 
   if (!$can_register_others)
@@ -896,7 +892,7 @@ if (!$room_disabled)
     // For the delete buttons, either the button is disabled and we show the reason why, or else
     // we add a click event to confirm the deletion
     unset($button_attributes['onclick']);
-
+    
     if (!$series)
     {
       echo "<div>\n";

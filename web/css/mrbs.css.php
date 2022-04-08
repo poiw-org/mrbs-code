@@ -2584,7 +2584,6 @@ h2.date.loading::after {
 
 div.eye {
   height: 1em;
-  display: inline-block !important;
 }
 
 .eye svg {
@@ -2595,11 +2594,5 @@ div.eye {
 }
 
 .eye.off svg {
-  display: none;
-}
-
-[data-kiosk] .minicalendars,
-[data-kiosk] nav.arrow,
-[data-kiosk] nav.view {
   display: none;
 }

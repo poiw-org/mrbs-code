@@ -41,7 +41,7 @@ class AuthIdcheck extends AuthNone
   }
 
 
-  protected function getUserFresh(string $username) : ?User
+  public function getUser(string $username) : ?User
   {
     global $server;
 
