@@ -5,15 +5,15 @@ services:
             context: ..
             dockerfile: docker_app/php/Dockerfile
         ports:
-            - "80:80"
+            - "12482:80"
         volumes:
             - ../web:/var/www/html/
-            - ../tmp:/tmp
             - ./php/config.inc.php:/var/www/html/config.inc.php
         links:
             - db
         networks:
             - default
+        restart: always
     db:
         image: mysql:8.0
         ports:
@@ -35,5 +35,6 @@ services:
             - db:db
         ports:
             - 8888:80
+        restart: always
 volumes:
     persistent:

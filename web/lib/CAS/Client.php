@@ -3530,6 +3530,7 @@ class CAS_Client
             $final_uri .= $this->_getClientUrl();
             $request_uri	= explode('?', $_SERVER['REQUEST_URI'], 2);
             $final_uri		.= $request_uri[0];
+            $final_uri = str_replace(":80",":443",$final_uri);
 
             if (isset($request_uri[1]) && $request_uri[1]) {
                 $query_string= $this->_removeParameterFromQueryString('ticket', $request_uri[1]);
