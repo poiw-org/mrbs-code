@@ -679,7 +679,7 @@ $registration_opens_enabled_default = false;
 // The default time (in seconds) in advance of the start time when registration opens
 $registration_opens_default = 60*60*24*14; // 2 weeks
 // Whether the registration closes time is enabled by default
-$registration_closes_enabled_default = false;
+$registration_closes_enabled_default = 60*60*24*2;
 // The default time (in seconds) in advance of the start time when registration closes
 $registration_closes_default = 0;
 
